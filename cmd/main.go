@@ -2,29 +2,54 @@ package main
 
 import (
 	"bloomFilter/pkg/bloomfilter"
-	"bloomFilter/pkg/hash"
-	"fmt"
-
+	"bloomFilter/pkg/parser"
 	"flag"
+	"fmt"
+	"runtime"
 )
 
 func main() {
-	options := bloomfilter.BloomFilterOption{}
-	n := flag.Int("n", 1000, "Number of elements expected to store in the Bloom Filter.")
+	n := flag.Int("n", 5000, "Number of elements expected to store in the Bloom Filter.")
 	p := flag.Float64("p", 0.99, "False positive possibility")
+	path := flag.String("path", "./data/testInput.txt", "Path for the input strings")
 
 	flag.Parse()
 
-	options.SetN(*n)
-	options.SetP(*p)
+	bl := bloomfilter.Factory{}.Build(*n, *p)
 
-	fmt.Println("Bloom Filter Options:", *n, *p)
-}
+	hashSet := make(map[string]bool)
+	strings, err := parser.Parser{}.Parse(*path)
+	if err != nil {
+		fmt.Println(fmt.Errorf("failed to parse file at %s: %w", *path, err))
+	}
 
-func performHash(hash hash.Hash_Interface, input string) uint64 {
-	return hash.Hash(input)
-}
+	bl.Feed(strings...)
 
-func getInt(hash uint64, size uint64) uint64 {
-	return hash % size
+	// test positive
+	testStr := []string{"asd", "dfsasas", "dssa", "asdfa", "asfas", "sdvcxz", "svewqe", "sa", "cxv", "ewrwfv", "vasaeew", "cva", "qwer", "vaeewq", "sdffcc", "wev", "hello", "bye", "dkse"}
+	for _, s := range testStr {
+		seen := bl.Check(s)
+		fmt.Println("seen ", testStr, "? - ", seen)
+	}
+
+	fmt.Println("------------------------------------------------------------------------")
+
+	// test negative
+	testStr2 := []string{"aaa", "bbb", "ccccc", "ddd", "a", "jkl"}
+	for _, s := range testStr2 {
+		seen := bl.Check(s)
+		fmt.Println("seen ", testStr, "? - ", seen)
+	}
+	var bloomFilterMem runtime.MemStats
+	runtime.ReadMemStats(&bloomFilterMem)
+
+	fmt.Printf("Allocated memory (HeapAlloc): %d bytes\n", bloomFilterMem.HeapAlloc)
+	fmt.Printf("Total memory allocated (Alloc): %d bytes\n", bloomFilterMem.Alloc)
+	fmt.Printf("Memory allocations (Mallocs): %d\n", bloomFilterMem.Mallocs)
+	fmt.Printf("Memory frees (Frees): %d\n", bloomFilterMem.Frees)
+
+	for _, s := range strings {
+		hashSet[s] = true
+	}
+
 }

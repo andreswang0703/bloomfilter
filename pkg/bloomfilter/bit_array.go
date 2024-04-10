@@ -1,6 +1,9 @@
 package bloomfilter
 
-import "fmt"
+import (
+	"fmt"
+	"math/bits"
+)
 
 type BitArray struct {
 	m    int
@@ -43,4 +46,13 @@ func (b *BitArray) Check(indexes []uint64) bool {
 func (b *BitArray) checkBit(arrIdx uint64, bitPosition uint64) bool {
 	mask := uint64(1) << bitPosition
 	return b.data[arrIdx]&mask != 0
+}
+
+// OccupancyRate get the number of bits flipped to total bits ratio
+func (b *BitArray) OccupancyRate() float32 {
+	flipped := 0
+	for _, value := range b.data {
+		flipped += bits.OnesCount64(value)
+	}
+	return float32(flipped) / float32(b.m*64)
 }

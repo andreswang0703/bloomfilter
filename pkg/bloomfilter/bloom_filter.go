@@ -1,6 +1,9 @@
 package bloomfilter
 
-import "bloomFilter/pkg/hash"
+import (
+	"bloomFilter/pkg/hash"
+	"fmt"
+)
 
 type BloomFilter interface {
 	Feed(str ...string)
@@ -21,12 +24,17 @@ func (b *BloomFilterImpl) Feed(str ...string) {
 		indexes := b.allHashes.GetIndexes(s)
 		b.bitArray.Flip(indexes)
 	}
+	fmt.Println("Occupancy rate:", b.OccupancyRate())
 }
 
 // Check if the given string is already seen by bloom filter
 func (b *BloomFilterImpl) Check(str string) bool {
 	indexes := b.allHashes.GetIndexes(str)
 	return b.bitArray.Check(indexes)
+}
+
+func (b *BloomFilterImpl) OccupancyRate() float32 {
+	return b.bitArray.OccupancyRate()
 }
 
 // init initialize bit array based on n

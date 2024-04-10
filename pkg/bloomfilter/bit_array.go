@@ -11,7 +11,7 @@ func (b *BitArray) init(m int) {
 	b.m = m
 	size := (m + 63) / 64
 	b.data = make([]uint64, size)
-	fmt.Println("created an uint array of size", size)
+	fmt.Println("created an uint array of size", size, "with total bit size", 64*size)
 }
 
 // Flip the bits based on the indexes

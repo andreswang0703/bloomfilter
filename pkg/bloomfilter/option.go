@@ -1,13 +1,14 @@
 package bloomfilter
 
 import (
+	"errors"
 	"fmt"
 	"math"
 )
 
-const maxM = 81920 // maximum array size of 100KB to bits (10 * 1024 * 8)
-const minM = 8192  // minimum array size of 1KB to bits (1024 * 8)
-const maxK = 3     // maximum hash function amount
+const maxM = 819200 // maximum array size of 100KB to bits (10 * 1024 * 8)
+const minM = 8192   // minimum array size of 1KB to bits (1024 * 8)
+const maxK = 10     // maximum hash function amount
 
 type Option struct {
 	n int     // # elements
@@ -18,17 +19,19 @@ type Option struct {
 
 // SetN set the number of items to build the Bloom filter.
 func (option *Option) SetN(n int) {
+	fmt.Println("setting n to", n)
 	option.n = n
-	option.setOptimizedK()
+	//option.setOptimizedK()
 }
 
 // SetP Set the false positive probability of Bloom filter.
-func (option *Option) SetP(p float64) {
+func (option *Option) SetP(p float64) error {
 	if p <= 0 || p >= 1 {
-		return // Invalid p value
+		return errors.New("invalid probability")
 	}
 	option.p = p
 	option.setOptimizedM()
+	return nil
 }
 
 func (option *Option) GetM() int {
@@ -52,6 +55,7 @@ func (option *Option) setOptimizedK() {
 	n := option.n
 	m := option.m
 	k := float64(m) / float64(n) * math.Log(2)
-	option.k = int(math.Min(math.Ceil(k), float64(maxK)))
-	fmt.Println("optimized k to", k)
+	actualK := int(math.Min(math.Ceil(k), float64(maxK)))
+	option.k = actualK
+	fmt.Println("optimized k to", k, "actual k:", actualK)
 }

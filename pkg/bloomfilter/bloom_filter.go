@@ -35,5 +35,5 @@ func (b *BloomFilterImpl) init() {
 	bitArray := BitArray{}
 	bitArray.init(m)
 	b.bitArray = bitArray
-	b.allHashes.Init()
+	b.allHashes.Init(b.options.k)
 }

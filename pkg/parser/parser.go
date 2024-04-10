@@ -8,7 +8,7 @@ import (
 
 type Parser struct{}
 
-func (p Parser) Parse(path string) ([]string, error) {
+func (p Parser) Parse(path string, delimiter string) ([]string, error) {
 	var results []string
 
 	file, err := os.Open(path)
@@ -21,7 +21,7 @@ func (p Parser) Parse(path string) ([]string, error) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		parts := strings.Split(line, ",")
+		parts := strings.Split(line, delimiter)
 		results = append(results, parts...)
 	}
 
